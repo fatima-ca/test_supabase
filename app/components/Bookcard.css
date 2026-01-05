@@ -1,0 +1,28 @@
+.title-book {
+    color: #ffffff;
+    line-height: 1;
+    font-weight: 800;
+    font-size: 20px;
+    padding: 0px;
+
+}
+.desc-book {
+    color: #9ad48b;
+    line-height: 1;
+    font-weight: 400;
+    font-size: 15px;
+    padding: 0px;
+}
+
+.costum-card {
+    background-color: #c93e3e;
+    width: 200px;
+    height: 150px;
+    border-radius: 2rem;
+    display: grid;
+    place-items: center;
+    margin: 20px;
+    padding: 20px;
+    box-shadow: 0 0 0 10px #9ad48b; 
+    line-height: 1px;
+}

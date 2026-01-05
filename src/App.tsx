@@ -1,37 +1,113 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect } from 'react'
+import { supabase } from './client';
+import Bookcard from '../app/components/Bookcard'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+  description: string;
+}
 
+function App() {
+  //array para guardar las tarjetas de libros
+  const [books, setBooks]  = useState<Book[]>([])
+  //guardar temporalmente los datos de cada libro
+  const [titleB, setTitle] = useState("")
+  const [descB, setDesc] = useState("")
+  const [authB, setAuth] = useState("")
+
+  //---para uso de supabase 
+  useEffect(() => {
+    fetchBooks()
+  }, [])
+
+  async function fetchBooks() {
+    const { data, error } = await supabase
+      .from('book')
+      .select('*')
+      .order('id', { ascending: false }) 
+    
+    if (error) {
+      console.error("Error fetching books:", error)
+    } else {
+      setBooks(data || [])
+      console.log("Books loaded:", data)
+    }
+  }
+
+  async function createBook() {
+  console.log("Intentando insertar:", {
+    title: titleB,
+    author: authB,
+    description: descB
+  })
+
+  if (titleB.trim() === '') {
+    alert("El título no puede estar vacío")
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('book')
+    .insert([
+      {
+        title: titleB,
+        author: authB,
+        description: descB
+      }
+    ])
+    .select()
+  
+  console.log("Respuesta de Supabase:", { data, error })
+  
+  if (error) {
+    console.error("Error completo:", error)
+    alert(`Error al guardar: ${error.message}`)
+  } else {
+    console.log("Book created:", data)
+    setTitle("")
+    setAuth("")
+    setDesc("")
+    fetchBooks()
+  }
+}
+    
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-
-      <h1>Vite + React</h1>
-
       <div className="card">
-        <button onClick={() => setCount((count) => count + 2)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+        <input 
+          type="text"
+          value={titleB}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter a title..."/>
+
+        <input 
+          type="text"
+          value={authB}
+          onChange={(e) => setAuth(e.target.value)}
+          placeholder="Author..."/>
+      
+        <input 
+          type="text"
+          value={descB}
+          onChange={(e) => setDesc(e.target.value)}
+          placeholder="Write a description..."/>
+      
+        <button onClick={createBook}>Save book</button>
+
+          {books.length === 0 && (
+            <p>No books yet. ¡Add a book!</p>
+          )}
+
+          {books.map((book) =>(
+            <Bookcard bookData={{titleBook: book.title, authBook: book.author,
+            descBook: book.description
+            }} key={book.id}/>
+          ))}
       </div>
-
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-
     </>
   )
 }
